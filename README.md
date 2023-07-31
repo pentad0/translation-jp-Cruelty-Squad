@@ -10,18 +10,20 @@
     作業対象のフォルダのパスなどを管理するバッチファイル。
   * 01_create_work_folder.bat  
     ワークフォルダを作成するバッチファイル。
-  * 02_copy_unpacked_files.bat  
+  * 02_copy_unpacked_gd_files_to_work_dir.bat  
+    *.gdファイルをワークフォルダにコピーして、バックアップフォルダを空にするバッチファイル。
+  * 03_copy_unpacked_files_to_game_dir.bat  
     crueltysquad.pckをリネームし、アンパックしたファイル一式をゲームフォルダにコピーするバッチファイル。
-  * 03_delete_unnecessary_files.bat  
-    バックアップフォルダから不要なファイルを削除してワークフォルダにコピーするバッチファイル。
-  * 04_export_text.bat  
+  * 04_delete_unnecessary_files.bat  
+    バックアップフォルダにワークフォルダから*.gdファイルを戻し、更に日本語化に不要なファイルを削除するバッチファイル。
+  * 05_export_text.bat  
     ゲームファイルから英語テキストtsvファイルを抽出するスクリプト起動用バッチファイル。
-  * 05_copy_japanese_font_file.bat  
+  * 06_copy_japanese_font_file_to_game_dir.bat  
     日本語フォントファイルを入れ替え対象のフォントファイル名にリネームしてゲームのフォントフォルダにコピーするバッチファイル。
-  * 06_import_text.bat  
+  * 07_import_text.bat  
     日本語テキストtsvファイルをアンパック・デコンパイルしたゲームファイルに埋め込むスクリプト起動用バッチファイル。  
     埋め込みスクリプトが未修正のファイルに対してでないと正常動作しないため、スクリプト実行前に毎回バックアップフォルダのファイルをコピーして埋め込み対象にしている。  
-  * 07_copy_modified_file.bat  
+  * 08_copy_modified_file_to_game_dir.bat  
     日本語化したファイルをゲームフォルダにコピーするバッチファイル。
 * py  
   Pythonスクリプトの格納フォルダ。
@@ -114,30 +116,20 @@
      crueltysquad.pckファイルのアンパックと*.gdファイルのデコンパイル用。
 1. 下記のバッチファイルを実行して作業用フォルダを作成する。  
    *bat/01_create_work_folder.bat*
-1. crueltysquad.pckをアンパックする。
+1. crueltysquad.pckをアンパック・デコンパイルする。
    1. Godot RE Toolsインストールフォルダのgdre_tools.exeを実行してメニューの"RE Tools"->"Recover project"を選ぶ。
    1. 開いたダイアログでCruelty Squadのゲームフォルダに格納されているcrueltysquad.pckを選択して"Open"を押す。  
-   1. "Destination Folder"にバックアップフォルダを選択して"Extract..."を押す。  
-      下記のバッチファイルを実行すればフォルダを作成できる。  
-      *bat/01_create_work_folder.bat*
-   1. Godot製のゲームは.pckファイルの代わりにアンパックしたファイル一式をそのまま同じフォルダにおく事でも動作させられるので、crueltysquad.pckを削除またはリネームした後に一式をコピーする。  
-      下記のバッチファイルを実行すればリネームとコピーができる。  
-      *bat/02_copy_unpacked_files.bat*
-1. *.gdcをデコンパイルする。  
-   Godot RE Toolsでデコンパイルできるのだが、このツールはコマンドラインに対応していないし、選択したサブフォルダ以下の*.gdcファイルを全て処理して同じ場所に*.gdファイルを生成するといった機能もないので、手動で全フォルダの*.gdファイルを選択してデコンパイルする以外なかった。  
-   面倒なので何とかしたかったのだが…  
-   1. Godot RE Toolsインストールフォルダのgdre_tools.exeを実行してメニューの"GDScript"->"Decompile .GDC/.GDE script files..."を選ぶ。
-   1. 開いたダイアログで"Add files..."を押してバックアップフォルダに格納されている*.gdcファイルを選択して"Open"を押す。  
-      Shiftキーを押しながら選択する事で複数ファイルを選択可能。  
-      この時*.tscnファイルなどを選択してしまってもそのファイルの処理がエラーになるだけで問題ないが、フォルダも一緒に選択してしまうと"Open"が押せなくなるのには注意。
-   1. "script bytecode version"に*.gdcファイルの格納フォルダを選択して"Decompile..."を押す。
-   1. "Destination folder"に"3.5.0 release"を選択する。
-   1. 以上を*.gdcファイル全てをデコンパイルするまでひたすら繰り返す。  
-      前回選択した*.gdcファイルを対象から外すには"Clear files"を押せばいい。
-   1. 下記のバッチファイルを実行してバックアップフォルダから不要なファイルを削除する。  
-      *bat/03_delete_unnecessary_files.bat*
+   1. "Destination Folder"にバックアップフォルダを、"Options"に"Full Recovery"を選択して"Extract..."を押す。  
+      この時に幾つかのファイルが変換できないというエラーが出た場合は無視していい。  
+   1. 下記のバッチファイルを実行して*.gdファイルだけをワークフォルダにコピーして退避した後に、一旦バックアップフォルダを空にする。  
+      *bat/02_copy_unpacked_gd_files_to_work_dir.bat*
+   1. "Destination Folder"にバックアップフォルダを、"Options"に"Extract Only"を選択して"Extract..."を押す。  
+1. Godot製のゲームは.pckファイルの代わりにアンパックしたファイル一式をそのまま同じフォルダに置くことでも動作させられるので、下記のバッチファイルを実行しcrueltysquad.pckをリネームしてバックアップを取った後に一式をコピーする。  
+   *bat/03_copy_unpacked_files_to_game_dir.bat*
+1. 下記のバッチファイルを実行してバックアップフォルダにワークフォルダから*.gdファイルを戻し、更に日本語化に不要なファイルを削除する。  
+   *bat/04_delete_unnecessary_files.bat*
 1. 下記のバッチファイルを実行してバックアップフォルダのゲームファイルから英語テキストtsvファイルを抽出する。  
-   *bat/04_export_text.bat*
+   *bat/05_export_text.bat*
 
 ### 日本語テキストtsvファイルを反映するまで
 1. まず以下をインストールする。
@@ -148,7 +140,7 @@
     私は日本語フォントに[ふぉんとうは怖い明朝体フリーフォント](http://www.fontna.com/%E3%81%B5%E3%81%89%E3%82%93%E3%81%A8%E3%81%86%E3%81%AF%E6%80%96%E3%81%84%E6%98%8E%E6%9C%9D%E4%BD%93/)を使わせて頂いた。  
     雰囲気だけで言えば[怨霊フォント 2.0](https://www.vector.co.jp/soft/win95/writing/se400162.html)の方が元のフォントに近いと思うのだが、ゲーム画面上だとあまりにも見づらかったので前者にした。
 1. 下記のバッチファイルを実行して日本語テキストtsvファイルをワークフォルダのゲームファイルに埋め込む。  
-   *bat/06_import_text.bat*
+   *bat/07_import_text.bat*
 1. *.gdをコンパイルする。  
    1. Godot Engine 3.5.2インストールフォルダのGodot_v3.5.2-stable_win64.exeを実行して右端の"新規プロジェクト"を押す。
    1. 開いたダイアログで"プロジェクト名"と"プロジェクトパス"を適当に入力して"作成して編集"を押す。
@@ -166,7 +158,7 @@
   
    もう一度コンパイルする場合はプロジェクトフォルダ内のワークフォルダに日本語テキストtsvファイルを埋め込み直したワークフォルダを上書きした後に、Godot Engineでプロジェクトを開いてエクスポートするところから作業すればいい。
 1. 下記のバッチファイルを実行して日本語を埋め込んだファイルをゲームフォルダにコピーする。  
-   *bat/07_copy_modified_file.bat*
+   *bat/08_copy_modified_file_to_game_dir.bat*
 
 
 # To Do
