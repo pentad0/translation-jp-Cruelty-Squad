@@ -1,5 +1,5 @@
-set gameDir="F:\SteamLibrary/steamapps/common/Cruelty Squad"
-rem set gameDir="%PROGRAMFILES(X86)%/Steam/SteamApps/common/Cruelty Squad"
+rem set gameDir="F:\SteamLibrary/steamapps/common/Cruelty Squad"
+set gameDir="%PROGRAMFILES(X86)%/Steam/SteamApps/common/Cruelty Squad"
 
 set tempDir="C:\Temp/Cruelty Squad"
 set backupDir="%tempDir:~1,-1%/crueltysquad_pck_bak"
