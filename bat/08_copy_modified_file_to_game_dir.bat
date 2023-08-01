@@ -1,5 +1,9 @@
 call ./00_config.bat
 
-robocopy %workDir% %gameDir% /s /xf *.gd *.remap /is
+powershell -Command "Expand-Archive -Path '%gdcProjectZipFile%' -DestinationPath '%gdcWorkDir%'"
+robocopy "%gdcWorkDir:~1,-1%/%workDirName%" %gameDir% *.gdc /e
+rd %gdcWorkDir% /s /q
+
+robocopy %workDir% %gameDir% /s /xf *.gd /is
 
 rem pause

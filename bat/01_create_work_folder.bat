@@ -4,5 +4,6 @@ mkdir %backupDir%
 mkdir %workDir%
 mkdir %tsvDir%
 mkdir %japaneseFontDir%
+mkdir %gdcProjectDir%
 
 rem pause
