@@ -15,5 +15,6 @@ set japaneseFontDir="%tempDir:~1,-1%/japanese_font"
 
 set gdcProjectDir="%tempDir:~1,-1%/gdc_project"
 
+set godotEngine="%tempDir:~1,-1%/Godot_v3.5.2-stable_win64.exe/Godot_v3.5.2-stable_win64.exe"
 set gdcProjectZipFile="%tempDir:~1,-1%/gdc_project.zip"
 set gdcWorkDir="%tempDir:~1,-1%/gdc_project_work"
