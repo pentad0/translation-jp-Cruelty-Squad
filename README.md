@@ -117,6 +117,8 @@
   gdcプロジェクトzipファイルの解凍先フォルダ。  
   *"C:\Temp/Cruelty Squad/gdc_project_work"* 
 
+例え日本語テキストtsvファイルを反映したいだけの場合も、一度は英語テキストtsvファイルを抽出する手順を実行しなければならない。  
+但しその場合、05_export_text.batの実行だけは必要ない。
 ### 英語テキストtsvファイルを抽出するまで
 1. まず以下をインストールする。
    * [Python](https://www.python.org/downloads/)  
