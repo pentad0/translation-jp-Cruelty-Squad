@@ -14,6 +14,14 @@ class FILE_SUFFIX(Enum):
     JSON = ".json"
     TSCN = ".tscn"
 
+class SOB(Enum):
+    STR = "[ "
+    REPLACER = "[SOB]"
+
+class EOB(Enum):
+    STR = " ]"
+    REPLACER = "[EOB]"
+
 class LF(Enum):
     STR = "\n"
     REPLACER = "\\n"
@@ -25,6 +33,7 @@ class ESCAPED_DOUBLE_QUOTE(Enum):
 class TEXT_TYPE(Enum):
     GD = "gd"
     JSON = "json"
+    DYN_LINES = "DYN_LINES"
     LINES = "LINES"
     DIALOG_TEXT = "dialog_text"
     IMPLANT_NAME = "implant_name"
@@ -93,40 +102,54 @@ def read_json(root_path, target_path, tsv_line_cols_list):
             for temp_match2 in re.finditer(r'"([^"]*)"', temp_match.group(2)):
                 tsv_col_list.append(temp_match2.group(1))
             tsv_col_list.append(temp_match.group(3))
-            tsv_col_list.append(EOL)
+            tsv_col_list.append(EOL.REPLACER)
             tsv_line_cols_list.append(tsv_col_list)
 
 def read_tscn(root_path, target_path, tsv_line_cols_list):
     with target_path.open(mode='r', encoding=FILE_ENCODING) as temp_file:
         file_text = escape_escaped_double_quot(temp_file.read())
 
-        for temp_match in re.finditer(r'(\[node name=[^\]]*\])[^\[]+LINES = \[([^\]]*)\]', file_text, re.DOTALL):
-            tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.LINES.value)
-            tsv_col_list.append(escape_escaped_double_quot(temp_match.group(1), True))
-            for temp_match2 in re.finditer(r'"([^"]*)"', escape_LF(temp_match.group(2))):
-                tsv_col_list.append(escape_escaped_double_quot(temp_match2.group(1), True))
-            tsv_col_list.append(EOL)
-            tsv_line_cols_list.append(tsv_col_list)
-
-        for temp_text_type in [
-            TEXT_TYPE.DIALOG_TEXT,
-            TEXT_TYPE.IMPLANT_NAME,
-            TEXT_TYPE.LEVEL_NAME,
-            TEXT_TYPE.LINE,
-            TEXT_TYPE.LINE2,
-            TEXT_TYPE.MESSAGE,
-            TEXT_TYPE.NPC_NAME,
-            TEXT_TYPE.OVERRIDE_NAME,
-            TEXT_TYPE.TEXT,
-            TEXT_TYPE.VALUE,
-        ]:
-            text_type_str = temp_text_type.value
-            for temp_match in re.finditer(r'(\[node name=[^\]]*\])[^\[]*\n' + text_type_str + ' = "([^"]*)"', file_text, re.DOTALL):
-                tsv_col_list = init_tsv_col_list(root_path, target_path, text_type_str)
+        top_str = '[node '
+        for temp_str in file_text.split('\n\n' + top_str):
+            temp_str = top_str + temp_str
+            for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\nDYN_LINES = \[([^\n]*)\]\n', temp_str, re.DOTALL):
+                tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.DYN_LINES.value)
                 tsv_col_list.append(escape_escaped_double_quot(temp_match.group(1), True))
-                tsv_col_list.append(escape_LF(escape_escaped_double_quot(temp_match.group(2), True)))
+                for temp_match2 in re.finditer(r'\[([^\]]*)\]', temp_match.group(2)):
+                    tsv_col_list.append(SOB.REPLACER.value)
+                    for temp_match3 in re.finditer(r'"([^"]*)"', temp_match2.group(1)):
+                        tsv_col_list.append(escape_escaped_double_quot(temp_match3.group(1), True))
+                    tsv_col_list.append(EOB.REPLACER.value)
                 tsv_col_list.append(EOL)
                 tsv_line_cols_list.append(tsv_col_list)
+
+            for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\nLINES = \[([^\]]*)\]', temp_str, re.DOTALL):
+                tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.LINES.value)
+                tsv_col_list.append(escape_escaped_double_quot(temp_match.group(1), True))
+                for temp_match2 in re.finditer(r'"([^"]*)"', escape_LF(temp_match.group(2))):
+                    tsv_col_list.append(escape_escaped_double_quot(temp_match2.group(1), True))
+                tsv_col_list.append(EOL)
+                tsv_line_cols_list.append(tsv_col_list)
+
+            for temp_text_type in [
+                TEXT_TYPE.DIALOG_TEXT,
+                TEXT_TYPE.IMPLANT_NAME,
+                TEXT_TYPE.LEVEL_NAME,
+                TEXT_TYPE.LINE,
+                TEXT_TYPE.LINE2,
+                TEXT_TYPE.MESSAGE,
+                TEXT_TYPE.NPC_NAME,
+                TEXT_TYPE.OVERRIDE_NAME,
+                TEXT_TYPE.TEXT,
+                TEXT_TYPE.VALUE,
+            ]:
+                text_type_str = temp_text_type.value
+                for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\n' + text_type_str + ' = "([^"]*)"', temp_str, re.DOTALL):
+                    tsv_col_list = init_tsv_col_list(root_path, target_path, text_type_str)
+                    tsv_col_list.append(escape_escaped_double_quot(temp_match.group(1), True))
+                    tsv_col_list.append(escape_LF(escape_escaped_double_quot(temp_match.group(2), True)))
+                    tsv_col_list.append(EOL)
+                    tsv_line_cols_list.append(tsv_col_list)
 
 def init_tsv_col_list(root_path, target_path, text_type, index_0 = "", index_1 = ""):
     tsv_col_list = []

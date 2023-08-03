@@ -10,6 +10,14 @@ TEXT_LIST_SEP = ", "
 CR_LF = "\r\n"
 MIN_COL_NUM = 4
 
+class SOB(Enum):
+    STR = "[ "
+    REPLACER = "[SOB]"
+
+class EOB(Enum):
+    STR = " ]"
+    REPLACER = "[EOB]"
+
 class LF(Enum):
     STR = "\n"
     REPLACER = "\\n"
@@ -21,6 +29,7 @@ class ESCAPED_DOUBLE_QUOTE(Enum):
 class TEXT_TYPE(Enum):
     GD = "gd"
     JSON = "json"
+    DYN_LINES = "DYN_LINES"
     LINES = "LINES"
     DIALOG_TEXT = "dialog_text"
     IMPLANT_NAME = "implant_name"
@@ -56,8 +65,8 @@ def import_text_tsv(target_dir_path_str, import_file_path_str):
                         write_gd_replace_all(target_dir_path, tsv_col_list)
                     case TEXT_TYPE.JSON:
                         write_json(target_dir_path, tsv_col_list)
-                    case TEXT_TYPE.LINES:
-                        write_lines(target_dir_path, tsv_col_list)
+                    case TEXT_TYPE.DYN_LINES | TEXT_TYPE.LINES:
+                        write_lines(target_dir_path, tsv_col_list, temp_text_type)
                     case _:
                         write_tscn_tagged_str(target_dir_path, tsv_col_list, temp_text_type)
 
@@ -101,20 +110,27 @@ def write_json(root_path, tsv_col_list):
     with target_path.open(mode='w', encoding=FILE_ENCODING, newline=CR_LF) as temp_file:
         temp_file.write(file_text)
 
-def write_lines(root_path, tsv_col_list):
+def write_lines(root_path, tsv_col_list, text_type):
     target_path = root_path / tsv_col_list[0]
     with target_path.open(mode='r', encoding=FILE_ENCODING) as temp_file:
         file_text = escape_escaped_double_quot(temp_file.read())
 
-    lines_str_list = []
+    lines_str = ""
     for temp_col in tsv_col_list[5:]:
-        lines_str_list.append('"' + temp_col + '"')
-    lines_str = TEXT_LIST_SEP.join(lines_str_list)
+        if temp_col == SOB.REPLACER.value:
+            lines_str += SOB.STR.value
+        elif temp_col == EOB.REPLACER.value:
+            lines_str = lines_str.rstrip(TEXT_LIST_SEP)
+            lines_str += EOB.STR.value + TEXT_LIST_SEP
+        else:
+            lines_str += '"' + temp_col + '"' + TEXT_LIST_SEP
+    lines_str = lines_str.rstrip(TEXT_LIST_SEP)
     
     tag_str = tsv_col_list[4]
     split_text_list = file_text.split(tag_str)
     if len(split_text_list) > 1:
-        split_text_list[1] = re.sub(r'LINES = \[[^\]]*\]', 'LINES = [ ' + lines_str + ' ]', split_text_list[1], 1, re.DOTALL)
+        text_type_str = text_type.value
+        split_text_list[1] = re.sub(r'\n' + text_type_str + ' = \[[^\n]*\]\n', '\n' + text_type_str + ' = [ ' + lines_str + ' ]\n', split_text_list[1], 1, re.DOTALL)
         file_text = tag_str.join(split_text_list)
         with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
             temp_file.write(escape_escaped_double_quot(file_text, True))
