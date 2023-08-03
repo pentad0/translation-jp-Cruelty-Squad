@@ -102,7 +102,7 @@ def read_json(root_path, target_path, tsv_line_cols_list):
             for temp_match2 in re.finditer(r'"([^"]*)"', temp_match.group(2)):
                 tsv_col_list.append(temp_match2.group(1))
             tsv_col_list.append(temp_match.group(3))
-            tsv_col_list.append(EOL.REPLACER)
+            tsv_col_list.append(EOL)
             tsv_line_cols_list.append(tsv_col_list)
 
 def read_tscn(root_path, target_path, tsv_line_cols_list):
