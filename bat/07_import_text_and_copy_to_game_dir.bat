@@ -12,9 +12,9 @@ cd %gdcProjectDir%
 %godotEngineExe% --export-pack "Windows Desktop" %gdcProjectZipFile%
 
 powershell -Command "Expand-Archive -Path '%gdcProjectZipFile%' -DestinationPath '%gdcWorkDir%'"
-robocopy "%gdcWorkDir:~1,-1%/%workDirName%" %gameDir% *.gdc /e
+robocopy "%gdcWorkDir:~1,-1%/%workDirName%" %gameDir% *.gdc /e /im /is
 rd %gdcWorkDir% /s /q
 
-robocopy %workDir% %gameDir% /s /xf *.gd /is
+robocopy %workDir% %gameDir% /s /xf *.gd /im /is
 
 rem pause
