@@ -82,17 +82,27 @@
     | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
     | 対象ファイルのルートからの相対パス | "LINES" | "" | "" | タグ | 文字列1 | 文字列2 | ... | 文字列x | "\[EOL\]" |
   * その他  
-    以下の種別は全て同じレイアウトで出力される。
-    * dialog_text
-    * implant_name
-    * level_name
-    * line
-    * line2
-    * message
-    * npc_name
-    * override_name
-    * text
-    * value
+    以下の種別は全て同じレイアウトで出力される。  
+    これらの項目はタグの下に存在しない場合、新たに追加される。  
+    1. 文字列項目（値が「"」で括られている）
+       * dialog_text
+       * implant_name
+       * level_name
+       * line
+       * line2
+       * message
+       * npc_name
+       * override_name
+       * text
+       * value
+    
+    1. 非文字列項目（値が「"」で括られていない）
+       * margin_left
+       * message
+       * margin_right
+       * margin_top
+       * margin_bottom
+       * custom_colors/font_color
       
     文字列内で改行が入っている場合、"\n"に変換して出力する。
     | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
