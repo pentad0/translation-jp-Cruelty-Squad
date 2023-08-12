@@ -42,9 +42,23 @@ class TEXT_TYPE(Enum):
     OVERRIDE_NAME = "override_name"
     TEXT = "text"
     VALUE = "value"
+    MARGIN_LEFT = "margin_left"
+    MARGIN_RIGHT = "margin_right"
+    MARGIN_TOP = "margin_top"
+    MARGIN_BOTTOM = "margin_bottom"
+    CUSTOM_FONT_COLOR = "custom_colors/font_color"
+
+NON_STR_TEXT_TYPE_LIST = [
+    TEXT_TYPE.MARGIN_LEFT,
+    TEXT_TYPE.MARGIN_RIGHT,
+    TEXT_TYPE.MARGIN_TOP,
+    TEXT_TYPE.MARGIN_BOTTOM,
+    TEXT_TYPE.CUSTOM_FONT_COLOR,
+]
 
 ESCAPE_STR = "\\"
 DOUBLE_ESCAPE_STR = "\\\\"
+DUMMY_REPL = "REPL"
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("target_dir_path_str", help="target_dir_path", type=str)
@@ -173,6 +187,7 @@ def write_lines(root_path, tsv_col_list):
             temp_file.write(escape_escaped_double_quot(file_text, True))
 
 def write_tscn_tagged_str(root_path, tsv_col_list, text_type):
+    is_non_text_type = (text_type in NON_STR_TEXT_TYPE_LIST)
     target_path = root_path / tsv_col_list[0]
     with target_path.open(mode='r', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
         file_text = escape_escaped_double_quot(temp_file.read())
@@ -181,10 +196,25 @@ def write_tscn_tagged_str(root_path, tsv_col_list, text_type):
     split_text_list = file_text.split(tag_str)
     if len(split_text_list) > 1:
         text_type_str = text_type.value
-        split_text_list[1] = re.sub(r'\n' + text_type_str + ' = "[^"]*"', '\n' + text_type_str + ' = "' + escape_escape_str(escape_LF(tsv_col_list[5], True)) + '"', split_text_list[1], 1, re.DOTALL)
+        if is_non_text_type:
+            new_line = '\n' + text_type_str + ' = ' + tsv_col_list[5]
+            temp_pattern = r'\n' + text_type_str + ' = [^\n]*'
+        else:
+            new_line = '\n' + text_type_str + ' = "' + escape_escape_str(escape_LF(tsv_col_list[5], True)) + '"'
+            temp_pattern = r'\n' + text_type_str + ' = "[^"]*"'
+        
+        if re.search(temp_pattern, split_text_list[1]) is None:
+            split_text_list[1] = re.sub(DUMMY_REPL, new_line, DUMMY_REPL + split_text_list[1], 1)
+        else:
+            split_text_list[1] = re.sub(temp_pattern, new_line, split_text_list[1], 1, re.DOTALL)
+
         file_text = tag_str.join(split_text_list)
+
+        if not is_non_text_type:
+            file_text = escape_escaped_double_quot(file_text, True)
+        
         with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
-            temp_file.write(escape_escaped_double_quot(file_text, True))
+            temp_file.write(file_text)
 
 def escape_escape_str(str):
     return str.replace(ESCAPE_STR, DOUBLE_ESCAPE_STR)
