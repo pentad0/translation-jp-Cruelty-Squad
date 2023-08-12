@@ -29,6 +29,7 @@ class ESCAPED_DOUBLE_QUOTE(Enum):
 class TEXT_TYPE(Enum):
     GD = "gd"
     JSON = "json"
+    DURATION = "DURATION"
     DYN_LINES = "DYN_LINES"
     LINES = "LINES"
     DIALOG_TEXT = "dialog_text"
@@ -65,6 +66,8 @@ def import_text_tsv(target_dir_path_str, import_file_path_str):
                         write_gd_replace_all(target_dir_path, tsv_col_list)
                     case TEXT_TYPE.JSON:
                         write_json(target_dir_path, tsv_col_list)
+                    case TEXT_TYPE.DURATION:
+                        write_duration(target_dir_path, tsv_col_list)
                     case TEXT_TYPE.DYN_LINES:
                         write_dyn_lines(target_dir_path, tsv_col_list)
                     case TEXT_TYPE.LINES:
@@ -111,6 +114,21 @@ def write_json(root_path, tsv_col_list):
     
     with target_path.open(mode='w', encoding=FILE_ENCODING, newline=CR_LF) as temp_file:
         temp_file.write(file_text)
+
+def write_duration(root_path, tsv_col_list):
+    target_path = root_path / tsv_col_list[0]
+    with target_path.open(mode='r', encoding=FILE_ENCODING) as temp_file:
+        file_text = temp_file.read()
+
+    lines_str = TEXT_LIST_SEP.join(tsv_col_list[5:])
+
+    tag_str = tsv_col_list[4]
+    split_text_list = file_text.split(tag_str)
+    if len(split_text_list) > 1:
+        split_text_list[1] = re.sub(r'DURATION = \[[^\]]*\]', 'DURATION = [ ' + lines_str + ' ]', split_text_list[1], 1, re.DOTALL)
+        file_text = tag_str.join(split_text_list)
+        with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+            temp_file.write(file_text)
 
 def write_dyn_lines(root_path, tsv_col_list):
     target_path = root_path / tsv_col_list[0]

@@ -33,6 +33,7 @@ class ESCAPED_DOUBLE_QUOTE(Enum):
 class TEXT_TYPE(Enum):
     GD = "gd"
     JSON = "json"
+    DURATION = "DURATION"
     DYN_LINES = "DYN_LINES"
     LINES = "LINES"
     DIALOG_TEXT = "dialog_text"
@@ -112,6 +113,15 @@ def read_tscn(root_path, target_path, tsv_line_cols_list):
         top_str = '[node '
         for temp_str in file_text.split('\n\n' + top_str):
             temp_str = top_str + temp_str
+
+            for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\DURATION = \[ +([^\]]*) +\]', temp_str, re.DOTALL):
+                tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.DURATION.value)
+                tsv_col_list.append(temp_match.group(1))
+                for temp_str2 in temp_match.group(2).split(', '):
+                    tsv_col_list.append(temp_str2)
+                tsv_col_list.append(EOL)
+                tsv_line_cols_list.append(tsv_col_list)
+
             for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\nDYN_LINES = \[([^\n]*)\]\n', temp_str, re.DOTALL):
                 tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.DYN_LINES.value)
                 tsv_col_list.append(escape_escaped_double_quot(temp_match.group(1), True))
