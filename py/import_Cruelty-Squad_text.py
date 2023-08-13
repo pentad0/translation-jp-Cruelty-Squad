@@ -42,19 +42,10 @@ class TEXT_TYPE(Enum):
     OVERRIDE_NAME = "override_name"
     TEXT = "text"
     VALUE = "value"
-    MARGIN_LEFT = "margin_left"
-    MARGIN_RIGHT = "margin_right"
-    MARGIN_TOP = "margin_top"
-    MARGIN_BOTTOM = "margin_bottom"
-    CUSTOM_FONT_COLOR = "custom_colors/font_color"
-
-NON_STR_TEXT_TYPE_LIST = [
-    TEXT_TYPE.MARGIN_LEFT,
-    TEXT_TYPE.MARGIN_RIGHT,
-    TEXT_TYPE.MARGIN_TOP,
-    TEXT_TYPE.MARGIN_BOTTOM,
-    TEXT_TYPE.CUSTOM_FONT_COLOR,
-]
+    TSCN_NON_STRING_VALUE = "tscnNonStringValue"
+    @classmethod
+    def _missing_(cls, value):
+        return TEXT_TYPE.TSCN_NON_STRING_VALUE
 
 ESCAPE_STR = "\\"
 DOUBLE_ESCAPE_STR = "\\\\"
@@ -187,7 +178,7 @@ def write_lines(root_path, tsv_col_list):
             temp_file.write(escape_escaped_double_quot(file_text, True))
 
 def write_tscn_tagged_str(root_path, tsv_col_list, text_type):
-    is_non_text_type = (text_type in NON_STR_TEXT_TYPE_LIST)
+    is_non_text_type = (text_type == TEXT_TYPE.TSCN_NON_STRING_VALUE)
     target_path = root_path / tsv_col_list[0]
     with target_path.open(mode='r', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
         file_text = escape_escaped_double_quot(temp_file.read())
@@ -195,7 +186,7 @@ def write_tscn_tagged_str(root_path, tsv_col_list, text_type):
     tag_str = tsv_col_list[4]
     split_text_list = file_text.split(tag_str)
     if len(split_text_list) > 1:
-        text_type_str = text_type.value
+        text_type_str = tsv_col_list[1]
         if is_non_text_type:
             new_line = '\n' + text_type_str + ' = ' + tsv_col_list[5]
             temp_pattern = r'\n' + text_type_str + ' = [^\n]*'
