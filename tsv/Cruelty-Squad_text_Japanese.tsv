@@ -1328,3 +1328,13 @@ Entities\Physics_Objects\ORG_Spine.tscn	value			[node name="Area" type="Area" pa
 Entities\Physics_Objects\ORG_Stomach.tscn	value			[node name="Area" type="Area" parent="."]	Stomach	[EOL]
 Entities\Physics_Objects\ORG_Tactical_Liver.tscn	value			[node name="Area" type="Area" parent="."]	Tactical Liver	[EOL]
 Entities\Physics_Objects\ORG_WormBrain.tscn	value			[node name="Area" type="Area" parent="."]	Worm Brain	[EOL]
+
+Menu\Speech.gd	insert_lines	92		\t\tif c.ord_at(0) >= 11904:	[EOL]
+Menu\Speech.gd	insert_lines	92		\t\t\temit_signal("character_speak")	[EOL]
+Menu\Speech.gd	insert_lines	92		\t\t\t$AudioStreamPlayer.stream = alpha_sound[c.ord_at(0) % 26]	[EOL]
+Menu\Speech.gd	insert_lines	92		\t\t\t$AudioStreamPlayer.play()	[EOL]
+Menu\Speech.gd	insert_lines	92		\t\t\t$AudioStreamPlayer.play()	[EOL]
+Scripts\speech_label.gd	insert_lines	91		\t\tif c.ord_at(0) >= 11904:	[EOL]
+Scripts\speech_label.gd	insert_lines	91		\t\t\temit_signal("character_speak")	[EOL]
+Scripts\speech_label.gd	insert_lines	91		\t\t\t$AudioStreamPlayer.stream = alpha_sound[c.ord_at(0) % 26]	[EOL]
+Scripts\speech_label.gd	insert_lines	91		\t\t\t$AudioStreamPlayer.play()	[EOL]
