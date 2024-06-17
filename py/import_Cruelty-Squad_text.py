@@ -22,6 +22,10 @@ class LF(Enum):
     STR = "\n"
     REPLACER = "\\n"
 
+class TAB(Enum):
+    STR = "\t"
+    REPLACER = "\\t"
+
 class ESCAPED_DOUBLE_QUOTE(Enum):
     STR = "\\\""
     REPLACER = "￥”"
@@ -43,6 +47,8 @@ class TEXT_TYPE(Enum):
     TEXT = "text"
     VALUE = "value"
     TSCN_NON_STRING_VALUE = "tscnNonStringValue"
+    INSERT_LINES = "insert_lines"
+    UPDATE_LINE = "update_line"
     @classmethod
     def _missing_(cls, value):
         return TEXT_TYPE.TSCN_NON_STRING_VALUE
@@ -61,6 +67,7 @@ def import_text_tsv(target_dir_path_str, import_file_path_str):
     import_file_path = pathlib.Path(import_file_path_str)
 
     with import_file_path.open(mode='r', encoding=FILE_ENCODING) as import_file:
+        inserted_line_count_dict_dict = {}
         for line_str in import_file:
             tsv_col_list = line_str.rstrip(LF.STR.value).split(TSV_SEP)
             if len(tsv_col_list) >= MIN_COL_NUM:
@@ -77,9 +84,14 @@ def import_text_tsv(target_dir_path_str, import_file_path_str):
                         write_dyn_lines(target_dir_path, tsv_col_list)
                     case TEXT_TYPE.LINES:
                         write_lines(target_dir_path, tsv_col_list)
+                    case TEXT_TYPE.INSERT_LINES:
+                        write_insert_lines(target_dir_path, tsv_col_list, inserted_line_count_dict_dict)
+                    case TEXT_TYPE.UPDATE_LINE:
+                        write_update_line(target_dir_path, tsv_col_list, inserted_line_count_dict_dict)
                     case _:
                         write_tscn_tagged_str(target_dir_path, tsv_col_list, temp_text_type)
 
+# not used
 def write_gd(root_path, tsv_col_list):
     target_path = root_path / tsv_col_list[0]
     with target_path.open(mode='r', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
@@ -87,8 +99,8 @@ def write_gd(root_path, tsv_col_list):
         i = int(tsv_col_list[2])
         lines[i] = lines[i].replace('"' + tsv_col_list[4] + '"', '"' + tsv_col_list[5] + '"')
 
-        with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
-            temp_file.writelines(lines)
+    with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+        temp_file.writelines(lines)
 
 def write_gd_replace_all(root_path, tsv_col_list):
     target_path = root_path / tsv_col_list[0]
@@ -207,6 +219,40 @@ def write_tscn_tagged_str(root_path, tsv_col_list, text_type):
         with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
             temp_file.write(file_text)
 
+def write_insert_lines(root_path, tsv_col_list, inserted_line_count_dict_dict):
+    rel_path = tsv_col_list[0]
+    target_path = root_path / rel_path
+    with target_path.open(mode='r', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+        target_line_number = int(tsv_col_list[2])
+        inserted_line_count = get_inserted_line_count(inserted_line_count_dict_dict, rel_path, target_line_number)
+
+        lines = temp_file.readlines()
+        insert_lines = tsv_col_list[4].split(LF.REPLACER.value)
+        insert_line_cunt = len(insert_lines)
+        for i in range(insert_line_cunt):
+            insert_lines[i] = escape_TAB(insert_lines[i], True) + LF.STR.value
+        add_inserted_line_count(inserted_line_count_dict_dict, rel_path, target_line_number, insert_line_cunt)
+
+        i = target_line_number + inserted_line_count
+        lines[i:i] = insert_lines
+
+        with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+            temp_file.writelines(lines)
+
+def write_update_line(root_path, tsv_col_list, inserted_line_count_dict_dict):
+    rel_path = tsv_col_list[0]
+    target_path = root_path / rel_path
+    with target_path.open(mode='r', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+        target_line_number = int(tsv_col_list[2])
+        inserted_line_count = get_inserted_line_count(inserted_line_count_dict_dict, rel_path, target_line_number)
+
+        lines = temp_file.readlines()
+        i = target_line_number + inserted_line_count
+        lines[i] = lines[i].replace(escape_TAB(tsv_col_list[4], True), escape_TAB(tsv_col_list[5], True))
+
+    with target_path.open(mode='w', encoding=FILE_ENCODING, newline=LF.STR.value) as temp_file:
+        temp_file.writelines(lines)
+
 def escape_escape_str(str):
     return str.replace(ESCAPE_STR, DOUBLE_ESCAPE_STR)
 
@@ -225,5 +271,27 @@ def escape_LF(str, do_reverse = False):
         old = LF.REPLACER.value
         new = LF.STR.value
     return str.replace(old, new)
+
+def escape_TAB(str, do_reverse = False):
+    old = TAB.STR.value
+    new = TAB.REPLACER.value
+    if do_reverse:
+        old = TAB.REPLACER.value
+        new = TAB.STR.value
+    return str.replace(old, new)
+
+def get_inserted_line_count(inserted_line_count_dict_dict, rel_path, target_line_number):
+    if rel_path not in inserted_line_count_dict_dict:
+        inserted_line_count_dict_dict[rel_path] = {}
+    inserted_line_count = 0
+    for k, v in inserted_line_count_dict_dict[rel_path].items():
+        if target_line_number >= k:
+            inserted_line_count += v
+    return inserted_line_count
+
+def add_inserted_line_count(inserted_line_count_dict_dict, rel_path, target_line_number, insert_line_cunt):
+    if target_line_number not in inserted_line_count_dict_dict[rel_path]:
+        inserted_line_count_dict_dict[rel_path][target_line_number] = 0
+    inserted_line_count_dict_dict[rel_path][target_line_number] += insert_line_cunt
 
 import_text_tsv(args.target_dir_path_str, args.import_file_path_str)
