@@ -112,7 +112,7 @@ def read_tscn(root_path, target_path, tsv_line_cols_list):
 
         top_str = '[node '
         for temp_str in file_text.split('\n\n' + top_str):
-            temp_str = top_str + temp_str
+            temp_str = top_str + temp_str + '\n'
 
             for temp_match in re.finditer(r'(\[node name=[^\]]*\]).*?\DURATION = \[ +([^\]]*) +\]', temp_str, re.DOTALL):
                 tsv_col_list = init_tsv_col_list(root_path, target_path, TEXT_TYPE.DURATION.value)
