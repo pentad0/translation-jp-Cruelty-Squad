@@ -1153,9 +1153,9 @@ Levels\Level10.tscn	level_name			[node name="MeshInstance" parent="." instance=E
 Levels\Level7.tscn	level_name			[node name="MeshInstance" parent="." instance=ExtResource( 93 )]	Alpine Hospitality	[EOL]
 Levels\Level8.tscn	level_name			[node name="MeshInstance" parent="." instance=ExtResource( 47 )]	God	[EOL]
 
-Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	Raymond Shocktroop Tacticalを手に入れた。	[EOL]
-Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake2/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	$1000000を手に入れた。	[EOL]
-Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake3/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	Golem Exosystemを手に入れた。	[EOL]
+Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	Raymond Shocktroop Tactical received.	[EOL]
+Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake2/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	$1000000 received.	[EOL]
+Levels\Bonus5.tscn	line			[node name="KinematicBody" parent="Area/snake3/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	Golem Exosystem received.	[EOL]
 Levels\Bonus5.tscn	line			[node name="Talker" parent="snirby" index="3"]	ここのタイムラインは相反するreality bubble（訳注：現実世界に対する閉じた主観的な認識。場合によってはその人が持つ常識の事）の影響下にある。お前にできることは何もない。	[EOL]
 
 Levels\Bonus5.tscn	line2			[node name="KinematicBody" parent="Area/snake/snake/Armature/Bone/Bone001/Bone002/Bone003/Bone004/Bone005" index="1"]	お前に新陳代謝（metabolism）を授ける。	[EOL]
